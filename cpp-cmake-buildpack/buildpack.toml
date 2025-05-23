@@ -1,0 +1,9 @@
+api = "0.7"
+
+[buildpack]
+id = "sav9a/cpp-cmake"
+version = "0.1.0"
+name = "C++ CMake Buildpack"
+
+[[stacks]]
+id = "sav9a.cpp.stack"

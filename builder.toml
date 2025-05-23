@@ -1,0 +1,26 @@
+description = "Custom C++ Builder"
+
+[stack]
+id = "sav9a.cpp.stack"
+build-image = "sav9a/tm-stack-build"
+run-image = "sav9a/tm-stack-run"
+
+[[buildpacks]]
+id = "sav9a/cpp-cmake"
+version = "0.1.0"
+uri = "./cpp-cmake-buildpack"
+
+[[order]]
+[[order.group]]
+id = "sav9a/cpp-cmake"
+version = "0.1.0"
+
+
+
+[[build.env]]
+name = "CNB_USER_ID"
+value = "1000"
+
+[[build.env]]
+name = "CNB_GROUP_ID"
+value = "1000"
