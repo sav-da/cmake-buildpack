@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -e
+
+echo "Running as user: $(id)"
+echo "Permissions for /layers: $(ls -ld /layers)"
+if [ -f "CMakeLists.txt" ]; then
+  echo "cpp-cmake"
+  exit 0
+else
+  exit 100
+fi

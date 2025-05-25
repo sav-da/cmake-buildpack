@@ -1,0 +1,4 @@
+[build]
+image = "sav9a/tm-stack-build"
+[run]
+image = "sav9a/tm-stack-run"

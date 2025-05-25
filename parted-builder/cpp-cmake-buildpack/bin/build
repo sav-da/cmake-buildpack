@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Получаем аргументы
+LAYERS_DIR="$1"
+PLATFORM_DIR="$2"
+PLAN_PATH="$3"
+
+echo "Начинаем сборку C++ приложения с использованием CMake..."
+echo "LAYERS_DIR: $LAYERS_DIR"
+echo "PLATFORM_DIR: $PLATFORM_DIR"
+echo "PLAN_PATH: $PLAN_PATH"
+
+# Определяем директорию слоя
+LAYER_NAME="cpp-layer"
+LAYER_DIR="${LAYERS_DIR}/${LAYER_NAME}"
+mkdir -p "${LAYER_DIR}/bin"
+
+# Собираем приложение
+BUILD_DIR="$(mktemp -d)"
+mkdir -p "${BUILD_DIR}/src"
+cp -r /app/template/* "${BUILD_DIR}/src"
+cp -r . "${BUILD_DIR}/src/part"
+mkdir -p "${BUILD_DIR}/build"
+cd "${BUILD_DIR}/build"
+cmake ../src
+make -j"$(nproc)"
+
+# Переносим бинарник
+cp myfunc "${LAYER_DIR}/bin/"
+
+# Создаем launch метаданные
+mkdir -p "${LAYER_DIR}/env.launch"
+echo "PATH=${LAYER_DIR}/bin:\$PATH" > "${LAYER_DIR}/env.launch/PATH"
+
+# Объявляем слой
+cat <<EOF > "${LAYERS_DIR}/launch.toml"
+[[processes]]
+type = "myfunc"
+command = "${LAYER_DIR}/bin/myfunc"
+default = true
+direct = true
+EOF
+
+# Устанавливаем метаданные слоя
+cat <<EOF > "${LAYER_DIR}.toml"
+[types]
+launch = true
+EOF
+
+echo "Сборка завершена успешно."
