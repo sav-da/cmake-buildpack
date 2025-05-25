@@ -15,6 +15,9 @@ uri = "./cpp-cmake-buildpack"
 id = "sav9a/cpp-cmake"
 version = "0.1.0"
 
+[[targets]]
+  os = "linux"
+  arch = "amd64"
 
 
 [[build.env]]

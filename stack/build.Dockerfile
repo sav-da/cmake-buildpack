@@ -1,5 +1,5 @@
-FROM ubuntu:22.04
-
+FROM paketobuildpacks/builder-jammy-buildpackless-static
+USER root
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Установка необходимых пакетов для сборки C++ приложений
@@ -16,15 +16,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 ARG CNB_USER_ID=1000
 ARG CNB_GROUP_ID=1000
 
-RUN groupadd --gid ${CNB_GROUP_ID} cnb && \
-    useradd --uid ${CNB_USER_ID} --gid ${CNB_GROUP_ID} -m -s /bin/bash cnb
-#RUN mkdir /layers && chmod -R 0777 /layers
 # Установка переменных окружения, необходимых для CNB
 ENV CNB_USER_ID=${CNB_USER_ID}
 ENV CNB_GROUP_ID=${CNB_GROUP_ID}
 
 # Установка пользователя по умолчанию
-USER 1000:1000
+USER ${CNB_USER_ID}:${CNB_GROUP_ID}
 
 # Добавление метаданных стека
 LABEL io.buildpacks.stack.id="sav9a.cpp.stack"
