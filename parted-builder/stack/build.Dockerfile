@@ -10,7 +10,43 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     ca-certificates \
     libssl-dev \
+    libgrpc-dev \
+    libprotobuf-dev \
+    libgrpc++-dev \
+    protobuf-compiler-grpc \
     && rm -rf /var/lib/apt/lists/*
+
+
+# Клонируем uWebSockets с подмодулями
+RUN git clone --recursive https://github.com/uNetworking/uWebSockets.git /uWebSockets && \
+    cd /uWebSockets && \
+    git checkout v20.73.0
+
+# Собираем uSockets (создает uSockets.a)
+RUN cd /uWebSockets/uSockets && \
+    make -j $(nproc) && cd ../ && make install
+
+# Проверяем наличие библиотеки uSockets.a
+RUN find /uWebSockets -name "uSockets.a" || echo "uSockets.a not found"
+
+# Копируем статическую библиотеку и заголовки в системные директории
+RUN cp /uWebSockets/uSockets/uSockets.a /usr/local/lib/libuWS.a && \
+    mkdir -p /usr/local/include/uWebSockets && \
+    cp /uWebSockets/src/*.h /usr/local/include/uWebSockets/ && \
+    cp /uWebSockets/uSockets/src/*.h /usr/local/include/
+
+# Проверяем содержимое для диагностики
+RUN ls -l /usr/local/lib/libuWS.a || echo "libuWS.a not copied" && \
+    ls -l /usr/local/include/uWebSockets/ || echo "uWebSockets headers not found" && \
+    ls -l /usr/local/include/libusockets.h || echo "libusockets.h not found"
+
+ENV GRPC_VERSION=1.66.0
+
+RUN git clone --recurse-submodules -b v${GRPC_VERSION} --depth 1 --shallow-submodules https://github.com/grpc/grpc && \
+    cd grpc && \
+    cmake -DgRPC_INSTALL=ON -DgRPC_BUILD_TESTS=OFF -B build && \
+    cmake --build build --parallel 4 && \
+    cmake --build build --parallel --target install
 
 RUN mkdir -p /app/template
 COPY server/CMakeLists.txt /app/template/
